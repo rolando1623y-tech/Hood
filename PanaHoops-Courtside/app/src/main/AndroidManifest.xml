@@ -1,0 +1,17 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+ <uses-permission android:name="android.permission.CAMERA"/>
+ <uses-permission android:name="android.permission.INTERNET"/>
+ <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
+ <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+ <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH"/>
+ <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+ <uses-feature android:name="android.hardware.camera.any" android:required="false"/>
+ <queries><intent><action android:name="android.intent.action.TTS_SERVICE"/></intent></queries>
+ <application android:label="PanaHoops FIT" android:icon="@mipmap/ic_launcher" android:allowBackup="false" android:supportsRtl="true" android:theme="@style/AppTheme" android:usesCleartextTraffic="false">
+  <service android:name=".FitService" android:exported="false" android:foregroundServiceType="health"/>
+  <activity android:name=".MatchActivity" android:screenOrientation="portrait" android:exported="false"/>
+  <activity android:name=".SocialActivity" android:screenOrientation="portrait" android:exported="false"/>
+  <activity android:name=".VisionActivity" android:screenOrientation="portrait" android:exported="false"/>
+  <activity android:name=".MainActivity" android:screenOrientation="portrait" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity>
+ </application>
+</manifest>

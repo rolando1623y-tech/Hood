@@ -1,0 +1,32 @@
+plugins { id 'com.android.application'; id 'org.jetbrains.kotlin.android' }
+android {
+ namespace 'com.panahoops.next'
+ compileSdk 35
+ buildToolsVersion '35.0.0'
+ defaultConfig { applicationId 'com.panahoops.courtside'; minSdk 26; targetSdk 35; versionCode 311; versionName '3.1.1-fit-source' ; ndk { abiFilters 'arm64-v8a' } }
+ buildTypes { release { minifyEnabled true; shrinkResources true; proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),'proguard-rules.pro' } }
+ compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+ testOptions { unitTests.includeAndroidResources=true; unitTests.all { systemProperty 'robolectric.dependency.repo.url','https://repo.maven.apache.org/maven2'; ['https.proxyHost','https.proxyPort','http.proxyHost','http.proxyPort','javax.net.ssl.trustStore'].each { key -> if(System.getProperty(key))systemProperty key,System.getProperty(key) } } }
+}
+kotlin { compilerOptions { jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17 } }
+
+dependencies {
+ implementation 'com.google.mediapipe:tasks-vision:0.10.21'
+ implementation platform('com.google.firebase:firebase-bom:33.10.0')
+ implementation 'com.google.firebase:firebase-auth'
+ implementation 'com.google.firebase:firebase-firestore'
+ implementation 'androidx.credentials:credentials:1.3.0'
+ implementation 'androidx.credentials:credentials-play-services-auth:1.3.0'
+ implementation 'com.google.android.libraries.identity.googleid:googleid:1.1.1'
+
+ implementation 'androidx.activity:activity:1.10.1'
+ implementation 'androidx.camera:camera-camera2:1.4.2'
+ implementation 'androidx.camera:camera-lifecycle:1.4.2'
+ implementation 'androidx.camera:camera-view:1.4.2'
+ implementation 'com.google.mlkit:pose-detection:18.0.0-beta5'
+ testImplementation 'junit:junit:4.13.2'
+ testImplementation 'org.robolectric:robolectric:4.14.1'
+}
+
+// Annotation processors are not runtime dependencies on Android.
+configurations.configureEach { exclude group: 'com.google.auto.value', module: 'auto-value' }

@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function signed(){ return request.auth != null; }
+  function member(id){ return signed() && request.auth.uid in get(/databases/$(database)/documents/groups/$(id)).data.members; }
+  match /groups/{id} {
+   // The random 128-bit document ID is the invitation. Do not expose it publicly.
+   allow get: if signed();
+   allow list: if signed() && request.auth.uid in resource.data.members;
+   allow create: if signed() && id.matches('[a-f0-9]{32}')
+    && request.resource.data.keys().hasOnly(['owner','name','members','created'])
+    && request.resource.data.owner == request.auth.uid
+    && request.resource.data.name is string && request.resource.data.name.size()>0 && request.resource.data.name.size()<=60
+    && request.resource.data.members == [request.auth.uid]
+    && request.resource.data.created == request.time;
+   allow update: if signed()
+    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members'])
+    && request.resource.data.members is list && request.resource.data.members.size()<=50
+    && ((!(request.auth.uid in resource.data.members)
+      && request.resource.data.members.toSet() == resource.data.members.toSet().union([request.auth.uid].toSet())
+      && request.resource.data.members.size()==resource.data.members.size()+1)
+     || (request.auth.uid in resource.data.members
+      && request.resource.data.members.toSet() == resource.data.members.toSet().difference([request.auth.uid].toSet())
+      && request.resource.data.members.size()==resource.data.members.size()-1));
+   allow delete: if false;
+   match /messages/{message} {
+    allow read: if member(id);
+    allow create: if member(id)
+     && request.resource.data.keys().hasOnly(['author','name','text','created'])
+     && request.resource.data.author==request.auth.uid
+     && request.resource.data.name is string && request.resource.data.name.size()<=100
+     && request.resource.data.text is string && request.resource.data.text.size()>0 && request.resource.data.text.size()<=1000
+     && request.resource.data.created==request.time;
+    allow update: if false;
+    allow delete: if member(id) && resource.data.author==request.auth.uid;
+   }
+   match /stats/{uid} {
+    allow read: if member(id);
+    allow create,update: if member(id) && uid==request.auth.uid
+     && request.resource.data.keys().hasOnly(['name','attempts','made','sessions','updated'])
+     && request.resource.data.name is string && request.resource.data.name.size()<=100
+     && request.resource.data.attempts is int && request.resource.data.attempts>=0 && request.resource.data.attempts<=10000000
+     && request.resource.data.made is int && request.resource.data.made>=0 && request.resource.data.made<=request.resource.data.attempts
+     && request.resource.data.sessions is int && request.resource.data.sessions>=0 && request.resource.data.sessions<=1000000
+     && request.resource.data.updated==request.time;
+    allow delete: if signed() && uid==request.auth.uid;
+   }
+  }
+  match /{document=**} { allow read,write: if false; }
+ }
+}
